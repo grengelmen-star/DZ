@@ -21,4 +21,4 @@ func getUserInput() {
 	fmt.Scan(&calculateHowMuch)
 
 }
-func convertCurrency(firstCurrency string, secondCurrency string, Quanity int) int {}
+func convertCurrency(firstCurrency string, secondCurrency string, Quanity int) {}
