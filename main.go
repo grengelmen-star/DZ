@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"strconv"
 )
 
 const USD_EUR = 0.8626
@@ -17,7 +16,10 @@ func main() {
 		fmt.Println("Поддерживаемые валюты USD, EUR, RUB")
 		calculateFrom, calculateIn, calculateHowMuch := getUserInput()
 		convertResult := convertCurrency(calculateFrom, calculateIn, calculateHowMuch)
-		if err := validateCurrencies(calculateFrom, calculateIn); err != nil {
+		if err := validateCurrency(calculateFrom); err != nil {
+			fmt.Println("Ошибка", err)
+		}
+		if err := validateCurrency(calculateIn); err != nil {
 			fmt.Println("Ошибка", err)
 		}
 		if err := validateNumbers(calculateHowMuch); err != nil {
@@ -42,7 +44,7 @@ func getUserInput() (calculateFrom string, calculateIn string, calculateHowMuch 
 	for {
 		fmt.Println("Введите исходную валюту(USD,EUR,RUB)")
 		fmt.Scan(&calculateFrom)
-		if err := validateCurrencies(calculateFrom, calculateIn); err == nil {
+		if err := validateCurrency(calculateFrom); err == nil {
 			break
 		}
 		fmt.Println("Ошибка, попробуйте снова")
@@ -50,7 +52,7 @@ func getUserInput() (calculateFrom string, calculateIn string, calculateHowMuch 
 	for {
 		fmt.Println("Введите в какую валюту вы желаете конвертировать(USD,EUR,RUB)")
 		fmt.Scan(&calculateIn)
-		if err := validateCurrencies(calculateFrom, calculateIn); err == nil {
+		if err := validateCurrency(calculateIn); err == nil {
 			break
 		}
 		fmt.Println("Ошибка, попробуйте снова")
@@ -71,18 +73,13 @@ func validateNumbers(calculateHowMuch int) error {
 	}
 	return nil
 }
-func validateCurrencies(calculateFrom string, calculateIn string) error {
-	if calculateFrom == "" || calculateIn == "" {
-		return fmt.Errorf("Валюты не могут быть пустыми")
+func validateCurrency(currency string) error {
+	if currency == "" {
+		return fmt.Errorf("валюта не может быть пустой")
 	}
-	if calculateFrom == calculateIn {
-		return fmt.Errorf("Вы не можете конвертировать %s в %s", calculateFrom, calculateIn)
-	}
-	if _, err := strconv.Atoi(calculateFrom); err == nil {
-		return fmt.Errorf("Ошибка, нужно ввести валюту")
-	}
-	if _, err := strconv.Atoi(calculateIn); err == nil {
-		return fmt.Errorf("Ошибка, нужно ввести валюту")
+	allowed := map[string]bool{"USD": true, "EUR": true, "RUB": true}
+	if !allowed[currency] {
+		return fmt.Errorf("допустимые валюты: USD, EUR, RUB")
 	}
 	return nil
 }
