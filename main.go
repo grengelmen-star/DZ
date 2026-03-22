@@ -17,8 +17,12 @@ func main() {
 		fmt.Println("Поддерживаемые валюты USD, EUR, RUB")
 		calculateFrom, calculateIn, calculateHowMuch := getUserInput()
 		convertResult := convertCurrency(calculateFrom, calculateIn, calculateHowMuch)
-		if err := validateCurrencies(calculateFrom, calculateIn, calculateHowMuch); err != nil {
+		if err := validateCurrencies(calculateFrom, calculateIn); err != nil {
 			fmt.Println("Ошибка", err)
+		}
+		if err := validateNumbers(calculateHowMuch); err != nil {
+			fmt.Println("Ошибка", err)
+
 		}
 		fmt.Printf("Вы конвертировали: %d %s в %s результат : %.2f \n", calculateHowMuch, calculateFrom, calculateIn, convertResult)
 		fmt.Println("Желаете конвертировать еще раз ?")
@@ -35,20 +39,41 @@ func main() {
 	}
 }
 func getUserInput() (calculateFrom string, calculateIn string, calculateHowMuch int) {
-	fmt.Println("Введите исходную валюту")
-	fmt.Scan(&calculateFrom)
-	fmt.Println("Введите в какую валюту вы желаете конвертировать")
-	fmt.Scan(&calculateIn)
-	fmt.Println("Введите количество конвертируемой валюты")
-	fmt.Scan(&calculateHowMuch)
+	for {
+		fmt.Println("Введите исходную валюту(USD,EUR,RUB)")
+		fmt.Scan(&calculateFrom)
+		if err := validateCurrencies(calculateFrom, calculateIn); err == nil {
+			break
+		}
+		fmt.Println("Ошибка, попробуйте снова")
+	}
+	for {
+		fmt.Println("Введите в какую валюту вы желаете конвертировать(USD,EUR,RUB)")
+		fmt.Scan(&calculateIn)
+		if err := validateCurrencies(calculateFrom, calculateIn); err == nil {
+			break
+		}
+		fmt.Println("Ошибка, попробуйте снова")
+	}
+	for {
+		fmt.Println("Введите количество конвертируемой валюты")
+		fmt.Scan(&calculateHowMuch)
+		if err := validateNumbers(calculateHowMuch); err == nil {
+			break
+		}
+		fmt.Println("Ошибка, попробуйте снова")
+	}
 	return
 }
-func validateCurrencies(calculateFrom string, calculateIn string, calculatehowMuch int) error {
+func validateNumbers(calculateHowMuch int) error {
+	if calculateHowMuch <= 0 {
+		return fmt.Errorf("Ошибка, число должно быть больше нуля")
+	}
+	return nil
+}
+func validateCurrencies(calculateFrom string, calculateIn string) error {
 	if calculateFrom == "" || calculateIn == "" {
 		return fmt.Errorf("Валюты не могут быть пустыми")
-	}
-	if calculatehowMuch <= 0 {
-		return fmt.Errorf("Ошибка, число должно быть больше нуля")
 	}
 	if calculateFrom == calculateIn {
 		return fmt.Errorf("Вы не можете конвертировать %s в %s", calculateFrom, calculateIn)
