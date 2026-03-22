@@ -2,12 +2,15 @@ package main
 
 import (
 	"fmt"
+	"os"
 )
 
 const USD_EUR = 0.8626
 const USD_RUB = 81.91
 const EUR_RUB = 97.29
 const EUR_USD = 1.16
+const RUB_EUR = 0.010279
+const RUB_USD = 0.011905
 
 func main() {
 	for {
@@ -44,6 +47,10 @@ func getUserInput() (calculateFrom string, calculateIn string, calculateHowMuch 
 	for {
 		fmt.Println("Введите исходную валюту(USD,EUR,RUB)")
 		fmt.Scan(&calculateFrom)
+		if calculateFrom == "stop" || calculateFrom == "exit" {
+			fmt.Println("Выход по запросу")
+			os.Exit(0)
+		}
 		if err := validateCurrency(calculateFrom); err == nil {
 			break
 		}
@@ -52,6 +59,13 @@ func getUserInput() (calculateFrom string, calculateIn string, calculateHowMuch 
 	for {
 		fmt.Println("Введите в какую валюту вы желаете конвертировать(USD,EUR,RUB)")
 		fmt.Scan(&calculateIn)
+		if calculateIn == "stop" || calculateIn == "exit" {
+			fmt.Println("Выход по запросу")
+			os.Exit(0)
+		}
+		if calculateFrom == calculateIn {
+			continue
+		}
 		if err := validateCurrency(calculateIn); err == nil {
 			break
 		}
@@ -93,6 +107,10 @@ func convertCurrency(firstCurrency string, secondCurrency string, Quanity int) f
 		result = float64(Quanity) * EUR_RUB
 	} else if firstCurrency == "EUR" && secondCurrency == "USD" {
 		result = float64(Quanity) * EUR_USD
+	} else if firstCurrency == "RUB" && secondCurrency == "EUR" {
+		result = float64(Quanity) * RUB_EUR
+	} else if firstCurrency == "RUB" && secondCurrency == "USD" {
+		result = float64(Quanity) * RUB_USD
 	}
 	return result
 }
