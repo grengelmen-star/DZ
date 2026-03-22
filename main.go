@@ -13,11 +13,12 @@ const EUR_USD = 1.16
 func main() {
 	for {
 		var convertAgain string
+		fmt.Println("Добро пожаловать в наш конвертор валют !")
+		fmt.Println("Поддерживаемые валюты USD, EUR, RUB")
 		calculateFrom, calculateIn, calculateHowMuch := getUserInput()
 		convertResult := convertCurrency(calculateFrom, calculateIn, calculateHowMuch)
-		if err := validateCurrencies(calculateFrom, calculateIn); err != nil {
+		if err := validateCurrencies(calculateFrom, calculateIn, calculateHowMuch); err != nil {
 			fmt.Println("Ошибка", err)
-			return
 		}
 		fmt.Printf("Вы конвертировали: %d %s в %s результат : %.2f \n", calculateHowMuch, calculateFrom, calculateIn, convertResult)
 		fmt.Println("Желаете конвертировать еще раз ?")
@@ -42,9 +43,12 @@ func getUserInput() (calculateFrom string, calculateIn string, calculateHowMuch 
 	fmt.Scan(&calculateHowMuch)
 	return
 }
-func validateCurrencies(calculateFrom string, calculateIn string) error {
+func validateCurrencies(calculateFrom string, calculateIn string, calculatehowMuch int) error {
 	if calculateFrom == "" || calculateIn == "" {
 		return fmt.Errorf("Валюты не могут быть пустыми")
+	}
+	if calculatehowMuch <= 0 {
+		return fmt.Errorf("Ошибка, число должно быть больше нуля")
 	}
 	if calculateFrom == calculateIn {
 		return fmt.Errorf("Вы не можете конвертировать %s в %s", calculateFrom, calculateIn)
