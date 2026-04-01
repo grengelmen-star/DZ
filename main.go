@@ -5,12 +5,14 @@ import (
 	"os"
 )
 
-const USD_EUR = 0.8626
-const USD_RUB = 81.91
-const EUR_RUB = 97.29
-const EUR_USD = 1.16
-const RUB_EUR = 0.010279
-const RUB_USD = 0.011905
+var moneyRaitCours = map[string]float64{
+	"USD_RUB": 81.91,
+	"USD_EUR": 0.8626,
+	"EUR_RUB": 97.29,
+	"EUR_USD": 1.16,
+	"RUB_EUR": 0.010279,
+	"RUB_USD": 0.011905,
+}
 
 func main() {
 	for {
@@ -98,19 +100,10 @@ func validateCurrency(currency string) error {
 	return nil
 }
 func convertCurrency(firstCurrency string, secondCurrency string, Quanity int) float64 {
-	var result float64
-	if firstCurrency == "USD" && secondCurrency == "EUR" {
-		result = float64(Quanity) * USD_EUR
-	} else if firstCurrency == "USD" && secondCurrency == "RUB" {
-		result = float64(Quanity) * USD_RUB
-	} else if firstCurrency == "EUR" && secondCurrency == "RUB" {
-		result = float64(Quanity) * EUR_RUB
-	} else if firstCurrency == "EUR" && secondCurrency == "USD" {
-		result = float64(Quanity) * EUR_USD
-	} else if firstCurrency == "RUB" && secondCurrency == "EUR" {
-		result = float64(Quanity) * RUB_EUR
-	} else if firstCurrency == "RUB" && secondCurrency == "USD" {
-		result = float64(Quanity) * RUB_USD
+	key := firstCurrency + "_" + secondCurrency
+	if rate, ok := moneyRaitCours[key]; ok {
+		return float64(Quanity) * rate
+	} else {
+		return 0
 	}
-	return result
 }
