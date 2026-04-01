@@ -5,15 +5,6 @@ import (
 	"os"
 )
 
-var moneyRaitCours = map[string]float64{
-	"USD_RUB": 81.91,
-	"USD_EUR": 0.8626,
-	"EUR_RUB": 97.29,
-	"EUR_USD": 1.16,
-	"RUB_EUR": 0.010279,
-	"RUB_USD": 0.011905,
-}
-
 func main() {
 	for {
 		var convertAgain string
@@ -100,10 +91,11 @@ func validateCurrency(currency string) error {
 	return nil
 }
 func convertCurrency(firstCurrency string, secondCurrency string, Quanity int) float64 {
-	key := firstCurrency + "_" + secondCurrency
-	if rate, ok := moneyRaitCours[key]; ok {
-		return float64(Quanity) * rate
-	} else {
-		return 0
+	rates := map[string]float64{
+		"USD": 1.0,
+		"EUR": 0.8626,
+		"RUB": 81.91,
 	}
+	usdValidate := float64(Quanity) / rates[firstCurrency]
+	return usdValidate * rates[secondCurrency]
 }
