@@ -5,13 +5,19 @@ import (
 	"os"
 )
 
+var rates = map[string]float64{
+	"USD": 1.0,
+	"EUR": 0.8626,
+	"RUB": 81.91,
+}
+
 func main() {
 	for {
 		var convertAgain string
 		fmt.Println("Добро пожаловать в наш конвертор валют !")
 		fmt.Println("Поддерживаемые валюты USD, EUR, RUB")
 		calculateFrom, calculateIn, calculateHowMuch := getUserInput()
-		convertResult := convertCurrency(calculateFrom, calculateIn, calculateHowMuch)
+		convertResult := convertCurrency(calculateFrom, calculateIn, calculateHowMuch, &rates)
 		if err := validateCurrency(calculateFrom); err != nil {
 			fmt.Println("Ошибка", err)
 		}
@@ -90,12 +96,8 @@ func validateCurrency(currency string) error {
 	}
 	return nil
 }
-func convertCurrency(firstCurrency string, secondCurrency string, Quanity int) float64 {
-	rates := map[string]float64{
-		"USD": 1.0,
-		"EUR": 0.8626,
-		"RUB": 81.91,
-	}
+func convertCurrency(firstCurrency string, secondCurrency string, Quanity int, ratesPoint *map[string]float64) float64 {
+	rates := *ratesPoint
 	usdValidate := float64(Quanity) / rates[firstCurrency]
 	return usdValidate * rates[secondCurrency]
 }
