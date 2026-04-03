@@ -18,10 +18,10 @@ func main() {
 		fmt.Println("Поддерживаемые валюты USD, EUR, RUB")
 		calculateFrom, calculateIn, calculateHowMuch := getUserInput()
 		convertResult := convertCurrency(calculateFrom, calculateIn, calculateHowMuch, &rates)
-		if err := validateCurrency(calculateFrom); err != nil {
+		if err := validateCurrency(calculateFrom, &rates); err != nil {
 			fmt.Println("Ошибка", err)
 		}
-		if err := validateCurrency(calculateIn); err != nil {
+		if err := validateCurrency(calculateIn, &rates); err != nil {
 			fmt.Println("Ошибка", err)
 		}
 		if err := validateNumbers(calculateHowMuch); err != nil {
@@ -50,7 +50,7 @@ func getUserInput() (calculateFrom string, calculateIn string, calculateHowMuch 
 			fmt.Println("Выход по запросу")
 			os.Exit(0)
 		}
-		if err := validateCurrency(calculateFrom); err == nil {
+		if err := validateCurrency(calculateFrom, &rates); err == nil {
 			break
 		}
 		fmt.Println("Ошибка, попробуйте снова")
@@ -65,7 +65,7 @@ func getUserInput() (calculateFrom string, calculateIn string, calculateHowMuch 
 		if calculateFrom == calculateIn {
 			continue
 		}
-		if err := validateCurrency(calculateIn); err == nil {
+		if err := validateCurrency(calculateIn, &rates); err == nil {
 			break
 		}
 		fmt.Println("Ошибка, попробуйте снова")
@@ -86,18 +86,16 @@ func validateNumbers(calculateHowMuch int) error {
 	}
 	return nil
 }
-func validateCurrency(currency string) error {
+func validateCurrency(currency string, ratesPoint *map[string]float64) error {
 	if currency == "" {
 		return fmt.Errorf("валюта не может быть пустой")
 	}
-	allowed := map[string]bool{"USD": true, "EUR": true, "RUB": true}
-	if !allowed[currency] {
-		return fmt.Errorf("допустимые валюты: USD, EUR, RUB")
+	if _, ok := (*ratesPoint)[currency]; !ok {
+		return fmt.Errorf("Ошибка, допустимые валюты USD,EUR,RUB")
 	}
 	return nil
 }
 func convertCurrency(firstCurrency string, secondCurrency string, Quanity int, ratesPoint *map[string]float64) float64 {
-	rates := *ratesPoint
-	usdValidate := float64(Quanity) / rates[firstCurrency]
-	return usdValidate * rates[secondCurrency]
+	usdValidate := float64(Quanity) / (*ratesPoint)[firstCurrency]
+	return usdValidate * (*ratesPoint)[secondCurrency]
 }
