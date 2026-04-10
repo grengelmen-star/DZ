@@ -1,9 +1,15 @@
 package main
 
-import "fmt"
+import (
+	"project3/api"
+	bin "project3/bins"
+	"project3/file"
+	"project3/storage"
+)
 
 func main() {
-	list := NewBinList()
-	list.Add(NewBin("1", "data.json", false))
-	fmt.Println(list)
+	bin.NewBinList()
+	api.TestFunc()
+	file.TestFileFunc()
+	storage.TestStorageFunc()
 }
