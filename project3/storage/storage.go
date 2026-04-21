@@ -7,32 +7,30 @@ import (
 	bin "project3/bins"
 )
 
-func CreateJsonBin(fileName string, b bin.Bin) error {
-	file, err := os.Create(fileName)
+func SaveBinList(fileName string, bins bin.BinList) error {
+	data, err := json.Marshal(bins)
 	if err != nil {
-		fmt.Println("Ошибка создания JSON файла")
+		fmt.Println("Ошибка сериализации:", err)
 		return err
 	}
-	defer file.Close()
-	encoder := json.NewEncoder(file)
-	encoder.SetIndent("", " ")
-	return encoder.Encode(b)
+	err = os.WriteFile(fileName, data, 0644)
+	if err != nil {
+		fmt.Println("Ошибка записи в файл:", err)
+		return err
+	}
+	return nil
 }
-func ReadJsonBin(fileName string) (*bin.Bin, error) {
-	file, err := os.ReadFile(fileName)
+func LoadBinList(fileName string) (bin.BinList, error) {
+	data, err := os.ReadFile(fileName)
 	if err != nil {
 		if os.IsNotExist(err) {
-			fmt.Println("Файл не существует !")
-			return nil, err
+			return bin.BinList{}, nil
 		}
-		fmt.Println("Ошибка чтения JSON файла:", err)
+		fmt.Println("Ошибка чтения файла:", err)
 		return nil, err
 	}
-	var binAcc bin.Bin
-	err = json.Unmarshal(file, &binAcc)
-	if err != nil {
-		fmt.Println(err)
-	}
-	return &binAcc, nil
+	var bins bin.BinList
+	err = json.Unmarshal(data, &bins)
+	return bins, nil
 }
 func TestStorageFunc() {}
