@@ -2,58 +2,104 @@ package main
 
 import (
 	"bufio"
-	"crypto/rand"
 	"errors"
 	"fmt"
-	"math/big"
 	"net/url"
 	"os"
+	passgen "passwordManager/GeneratePassword"
+	"passwordManager/accountfiles"
 	"strings"
-	"time"
 )
 
-type account struct {
-	login    string
-	password string
-	URL      string
-}
-type accountWithTimeStamp struct {
-	createdAt time.Time
-	updatedAt time.Time
-	account
-}
-
-func (acc *account) generatePassword(n int) {
-	symbols := "abcdifghjklmnopqrstuvw"
-	symbolsRune := []rune(symbols)
-	required := make([]rune, 0, n)
-	for i := 0; i < n; i++ {
-		index := randomInt(len(symbolsRune))
-		required = append(required, symbolsRune[index])
-	}
-	acc.password = string(required)
-}
-
-func (acc account) outputPassword() {
-	fmt.Println(acc)
-}
-
 func main() {
+	run()
+}
+func run() {
+	accounts, err := accountfiles.LoadAccountFromFile("accounts.json")
+	if err != nil {
+		fmt.Println("Ошибка загрузки аккаунтов", err)
+		return
+	}
+	for {
+		choise := showMeny()
+		switch choise {
+		case "1":
+			newAcc := createAccount()
+			accounts = append(accounts, newAcc)
+			err := accountfiles.SaveAccountToFile(accounts, "accounts.json")
+			if err != nil {
+				fmt.Println("Ошибка сохранения:", err)
+			} else {
+				fmt.Println("Аккаунт успешно сохранен!")
+			}
+		case "2":
+			findAndShowAcc(accounts)
+		case "3":
+			accounts = deleteAccount(accounts)
+			err := accountfiles.SaveAccountToFile(accounts, "accounts.json")
+			if err != nil {
+				fmt.Println("Ошибка сохранения: ", err)
+			}
+		case "4":
+			fmt.Println("___Выход___")
+			return
+		default:
+			fmt.Println("Такой функции пока не реализовано, пожалуйста выберите 1-4")
+		}
+	}
+}
+func showMeny() string {
+	var userChoise string
+	fmt.Println("----Добро пожаловать в менеджер аккаунтов----")
+	fmt.Println("Пожалуйста, выберите интересующий вас пункт(1-4):")
+	fmt.Println("1)Создать аккаунт\n2)Найти аккаунт\n3)Удалить аккаунт\n4)Выйти из программы")
+	fmt.Scan(&userChoise)
+	return userChoise
+}
+func findAndShowAcc(accounts []accountfiles.Account) {
+	var login string
+	fmt.Println("Введите логин для поиска:")
+	fmt.Scan(&login)
+	for _, acc := range accounts {
+		if acc.Login == login {
+			fmt.Printf("Найден: Login: %s, Password: %s, URL: %s\n", acc.Login, acc.Password, acc.URL)
+			return
+		}
+	}
+	fmt.Println("Такого аккаунта не существует ! ")
+
+}
+func deleteAccount(accounts []accountfiles.Account) []accountfiles.Account {
+	var login string
+	fmt.Println("Введите логин аккаунта, который хотите удалить:")
+	fmt.Scan(&login)
+	for i, acc := range accounts {
+		if acc.Login == login {
+			accounts = append(accounts[:i], accounts[i+1:]...)
+			fmt.Println("Аккаунт успешно удален")
+			return accounts
+		}
+	}
+	fmt.Println("Такого аккаунта не существует")
+	return accounts
+}
+func createAccount() accountfiles.Account {
 	login := promptData("Введите логин")
 	password := promptData("Введите пароль")
 	URL := promptData("Введите URL")
 	myAccount1, err := newAccount(login, password, URL)
 	if err != nil {
-		return
+		fmt.Println("Ошибка создания аккаунта")
 	}
 	if password == "" {
 		fmt.Println("Пароль был сгенерирован автоматически, поскольку вы не ввели его ")
-		myAccount1.generatePassword(12)
+		myAccount1.Password = passgen.GeneratePassword(12)
 	}
-	myAccount1.outputPassword()
+	return *myAccount1
 
 }
-func newAccountWithTimeStamp(login, password, urlString string) (*accountWithTimeStamp, error) {
+
+func newAccount(login, password, urlString string) (*accountfiles.Account, error) {
 	if login == "" {
 		return nil, errors.New("Have no login")
 	}
@@ -61,29 +107,10 @@ func newAccountWithTimeStamp(login, password, urlString string) (*accountWithTim
 	if err != nil {
 		return nil, errors.New("Invalid URL")
 	}
-	newAcc := &accountWithTimeStamp{
-		createdAt: time.Now(),
-		updatedAt: time.Now(),
-		account: account{
-			URL:      urlString,
-			login:    login,
-			password: password,
-		},
-	}
-	return newAcc, nil
-}
-func newAccount(login, password, urlString string) (*account, error) {
-	if login == "" {
-		return nil, errors.New("Have no login")
-	}
-	_, err := url.ParseRequestURI(urlString)
-	if err != nil {
-		return nil, errors.New("Invalid URL")
-	}
-	return &account{
-		login:    login,
+	return &accountfiles.Account{
+		Login:    login,
 		URL:      urlString,
-		password: password,
+		Password: password,
 	}, nil
 }
 
@@ -92,16 +119,4 @@ func promptData(prompt string) string {
 	reader := bufio.NewReader(os.Stdin)
 	result, _ := reader.ReadString('\n')
 	return strings.TrimSpace(result)
-}
-
-func randomInt(n int) int {
-	if n <= 0 {
-		return 0
-	}
-	bigN := big.NewInt(int64(n))
-	val, err := rand.Int(rand.Reader, bigN)
-	if err != nil {
-		panic(err)
-	}
-	return int(val.Int64())
 }
