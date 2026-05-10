@@ -11,6 +11,11 @@ var inputOperation string
 var inputNumbers string
 
 func main() {
+	calcMap := map[string]func(s []int) float64{
+		"AVG": calculateAVG,
+		"SUM": calculateSUM,
+		"MED": calculateMED,
+	}
 	fmt.Println("-----Калькулятор-----")
 	for {
 		getUserInput()
@@ -25,21 +30,11 @@ func main() {
 			}
 			numbers = append(numbers, num)
 		}
-		valid := true
-		switch inputOperation {
-		case "AVG":
-			fmt.Println("Результат подсчета AVG : ", calculateAVG(numbers))
-		case "SUM":
-			fmt.Println("Результат подсчета SUM : ", calculateSUM(numbers))
-		case "MED":
-			fmt.Println("Результат подсчета MED : ", calculateMED(numbers))
-		default:
-			fmt.Println("Ошибка: неизвестная операция, пожалуйста, повторите ввод")
-			valid = false
+		calcFunc := calcMap[inputOperation]
+		if calcFunc == nil {
+			break
 		}
-		if !valid {
-			continue
-		}
+		fmt.Printf("Результат вычисления:%v\n", calcFunc(numbers))
 		fmt.Println("Желаете провести еще расчет ?(Y/N)")
 		var continueOperation string
 		fmt.Scan(&continueOperation)
@@ -70,14 +65,14 @@ func calculateAVG(s []int) float64 {
 	result := float64(cycleResult) / float64(len(s))
 	return result
 }
-func calculateSUM(s []int) int {
+func calculateSUM(s []int) float64 {
 	if len(s) == 0 {
 		fmt.Println("Ошибка!")
 		return 0
 	}
-	var cycleResult int
+	var cycleResult float64
 	for _, value := range s {
-		cycleResult += value
+		cycleResult += float64(value)
 	}
 	return cycleResult
 }
